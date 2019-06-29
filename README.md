@@ -2,6 +2,7 @@
 
 How to run mitreid locally:
 
+<a href="https://youtu.be/UFyUtZ6oMYE">Video Demo, locall install</a>
 
 ## Build 
 ```
@@ -110,18 +111,18 @@ it's config to use postgress instead:
 
 Go to the `OpenID-Connect-Java-Spring-Server` directory then edit:
 ```
-vi ./openid-connect-server-webapp/target/openid-connect-server-webapp-1.3.3/WEB-INF/data-context.xml
+vi openid-connect-server-webapp/src/main/webapp/WEB-INF/data-context.xml
 ```
-- Un-comment out the entire Postgres config section (**from line 79**)
-- Comment out or delete the entire Hbase (`hsql`) config section (**lines 25-49**)
+- Comment out or delete the entire Hbase (`hsql`) config section
 
 Correct the database port: 
 
 - Replace `jdbc:postgresql://localhost/oic` with `jdbc:postgresql://127.0.0.1:5434/oic`
-- Save `data-context.xml`
 
 Replace the `optionally initialize the database` part with the following:
 Note that `loading_temp_tables.sql` needs to be copied from the hbase example.
+
+Careful, it's really easy to make a syntax error here
 ```
   <jdbc:initialize-database data-source="dataSource">
     <jdbc:script location="classpath:/db/psql/psql_database_tables.sql"/> 
@@ -134,6 +135,8 @@ Note that `loading_temp_tables.sql` needs to be copied from the hbase example.
   </jdbc:initialize-database>
 ```
 
+- Save `data-context.xml`
+
 Edit `vi openid-connect-server-webapp/pom.xml` to include postgres as a dependency:
 
 ```
@@ -144,19 +147,26 @@ Edit `vi openid-connect-server-webapp/pom.xml` to include postgres as a dependen
 </dependency>
 ```
 
-Rebuild:
-```
-mvn -DskipTests clean install
-```
-
 Now run Mitreid again: note, you *must* first go into `openid-connect-server-webapp` first:
 ```
 cd openid-connect-server-webapp/
 mvn jetty:run-war
 ```
 
-Visit: 
-http://localhost:8080/openid-connect-server-webapp
+Visit: http://localhost:8080/openid-connect-server-webapp
+which will now be using the postgress database!
+
+After running sucessfully once, you **must** disable (comment out) the 
+`initialize-database` step in `data-context.xml` of the project.
+
+Now the database is seeded, remove or comment out `initialize-database` section:
+
+```
+vi openid-connect-server-webapp/src/main/webapp/WEB-INF/data-context.xml
+```
+
+
+
 
 
 
