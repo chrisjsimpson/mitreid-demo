@@ -45,6 +45,10 @@ oauth clients may be created via the Open Bank Project application.
 - Another for Mitreid
 - This simulates connecting to a remote database (we still need to link them)
 
+Ports:
+- Mitreid will listen on 8080
+- Open Bank Project on: 8081
+
 Run postgress instance locally on port 5433 for Open Bank Project
 ```
 docker run --name=obp -p 5433:5432 --detach -e POSTGRES_PASSWORD=password -e POSTGRES_USER=obp -e POSTGRES_DB=obp postgres:9.6-alpine
@@ -69,6 +73,34 @@ CONTAINER ID        IMAGE                 COMMAND                  CREATED      
 16aa373a6bfb        postgres:9.6-alpine   "docker-entrypoint.s…"   3 seconds ago       Up 2 seconds        0.0.0.0:5434->5432/tcp   mitreid
 4b472d471525        postgres:9.6-alpine   "docker-entrypoint.s…"   9 seconds ago       Up 8 seconds        0.0.0.0:5433->5432/tcp   obp
 ```
+
+## Configure Open Bank Project to use postgress
+
+Clone open bank project yourself, and copy the `obp-api/src/main/resources/props/default.props.template`
+to `obp-api/src/main/resources/props/default.props`.
+
+Edit `obp-api/src/main/resources/props/default.props` to contain the database credentials of obp:
+
+```
+vim obp-api/src/main/resources/props/default.props
+# Set 
+db.url=jdbc:postgresql://127.0.0.1:5433/obp?user=obp&password=password
+# Save
+```
+Set the post to 8081:
+```
+hostname=http://127.0.0.1:8081
+dev.port=8081
+```
+
+
+Start Open Bank Project, which will now use the postgress database:
+```
+mvn install -pl .,obp-commons && mvn -DskipTests -D jetty.port=8081 jetty:run -pl obp-api
+```
+
+Once Open Bank Project is running, visit http://127.0.0.1:8081/user_mgt/sign_up
+and create an account for yourself.
 
 Teardown:
 ```
