@@ -49,14 +49,9 @@ Run postgress instance locally on port 5433 for Open Bank Project
 ```
 docker run --name=obp -p 5433:5432 --detach -e POSTGRES_PASSWORD=password -e POSTGRES_USER=obp -e POSTGRES_DB=obp postgres:9.6-alpine
 ```
-If you see `LOG:  could not bind IPv4 socket: Address in use`, then stop your local postgress server:
+
+#### You can view logs of either postgress instance with:
 ```
-sudo service postgresql stop
-```
-Then start your docker postgres again:
-```
-docker start obp
-# You can view logs with:
 docker logs -f obp
 ```
 
