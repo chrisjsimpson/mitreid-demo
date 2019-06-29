@@ -62,7 +62,7 @@ docker logs -f obp
 Run *another* postgress instance locally on a different port (5434) for Mitreid
 
 ```
-docker run --name=mitreid -p 5434:5432 --detach -e POSTGRES_PASSWORD=password -e POSTGRES_USER=mitreid -e POSTGRES_DB=mitreid postgres:9.6-alpine
+docker run --name=mitreid -p 5434:5432 --detach -e POSTGRES_PASSWORD=oic -e POSTGRES_USER=oic -e POSTGRES_DB=oic postgres:9.6-alpine
 ```
 
 Success looks like this: A postgres instance for Open Bank Project and another for Mitreid
@@ -100,7 +100,65 @@ mvn install -pl .,obp-commons && mvn -DskipTests -D jetty.port=8081 jetty:run -p
 ```
 
 Once Open Bank Project is running, visit http://127.0.0.1:8081/user_mgt/sign_up
-and create an account for yourself.
+and create an account for yourself. 
+
+Now make sure Mitreid is configured to also use postgress following the instructions.
+
+## Configure Mitreid to use postgress
+By default Mitreid used Hbase for a cute play database. Now we need to change
+it's config to use postgress instead:
+
+Go to the `OpenID-Connect-Java-Spring-Server` directory then edit:
+```
+vi ./openid-connect-server-webapp/target/openid-connect-server-webapp-1.3.3/WEB-INF/data-context.xml
+```
+- Un-comment out the entire Postgres config section (**from line 79**)
+- Comment out or delete the entire Hbase (`hsql`) config section (**lines 25-49**)
+
+Correct the database port: 
+
+- Replace `jdbc:postgresql://localhost/oic` with `jdbc:postgresql://127.0.0.1:5434/oic`
+- Save `data-context.xml`
+
+Replace the `optionally initialize the database` part with the following:
+Note that `loading_temp_tables.sql` needs to be copied from the hbase example.
+```
+  <jdbc:initialize-database data-source="dataSource">
+    <jdbc:script location="classpath:/db/psql/psql_database_tables.sql"/> 
+    <jdbc:script location="classpath:/db/hsql/loading_temp_tables.sql"/> 
+    <jdbc:script location="classpath:/db/psql/security-schema.sql"/>
+    <jdbc:script location="classpath:/db/psql/users.sql"/>
+    <jdbc:script location="classpath:/db/psql/clients.sql"/>
+    <jdbc:script location="classpath:/db/psql/scopes.sql"/>
+    <jdbc:script location="classpath:/db/psql/psql_database_index.sql"/> 
+  </jdbc:initialize-database>
+```
+
+Edit `vi openid-connect-server-webapp/pom.xml` to include postgres as a dependency:
+
+```
+<dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.0.0.jre7</version>
+</dependency>
+```
+
+Rebuild:
+```
+mvn -DskipTests clean install
+```
+
+Now run Mitreid again: note, you *must* first go into `openid-connect-server-webapp` first:
+```
+cd openid-connect-server-webapp/
+mvn jetty:run-war
+```
+
+Visit: 
+http://localhost:8080/openid-connect-server-webapp
+
+
 
 Teardown:
 ```
