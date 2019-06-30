@@ -82,10 +82,17 @@ to `obp-api/src/main/resources/props/default.props`.
 
 Edit `obp-api/src/main/resources/props/default.props` to contain the database credentials of obp:
 
+
+Get the IP address of the postgre database for Open Bank Project:
+```
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' obp
+```
+
+
 ```
 vim obp-api/src/main/resources/props/default.props
-# Set 
-db.url=jdbc:postgresql://127.0.0.1:5433/obp?user=obp&password=password
+# Set (your ip address will be different)
+db.url=jdbc:postgresql://172.17.0.3:5432/obp?user=obp&password=password
 # Save
 ```
 Set the post to 8081:
