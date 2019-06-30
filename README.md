@@ -267,19 +267,182 @@ drop table client_details;
 CREATE VIEW users AS 
   SELECT * FROM public.dblink ('obpapiserver', 
     'select username, substring(concat(password_pw,password_slt), 3), 
-    validated from public.authuser') 
+    validated 
+    from public.authuser') 
   AS DATA(username VARCHAR, password VARCHAR, enabled VARCHAR);
 ```
 
-### Create the authorities view
+#### Create the authorities view
 ```
 CREATE VIEW authorities AS 
-  SELECT * FROM dblink ('obpapiserver', 
-    'select username, 
-    ''ROLE_USER'' authority from authuser') 
+  SELECT * FROM public.dblink ('obpapiserver', 
+    'select username, ''ROLE_USER'' 
+    authority from public.authuser') 
   AS DATA(username VARCHAR, authority VARCHAR);
 ```
 
+#### Create user_info view
+```
+CREATE VIEW user_info AS 
+  SELECT * FROM public.dblink ('obpapiserver', 
+    'select id, NULL sub, username, concat(firstname, '' '', lastname), 
+      firstname, lastname, NULL middle_name, NULL nickname, NULL profile, 
+      NULL picture, NULL website, email, validated, NULL gender, 
+      NULL zone_info, NULL locale, NULL phone_number, 
+      NULL phone_number_verified, NULL address_id, NULL updated_time, 
+      NULL birthdate, NULL src from public.authuser') 
+  AS DATA(id INT, sub VARCHAR(256), preferred_username VARCHAR(256), 
+          name VARCHAR(256), given_name VARCHAR(256), family_name VARCHAR(256),
+          middle_name VARCHAR(256), nickname VARCHAR(256), profile VARCHAR(256),
+          picture VARCHAR(256), website VARCHAR(256), email VARCHAR(256), 
+          email_verified BOOLEAN, gender VARCHAR(256), zone_info VARCHAR(256), 
+          locale VARCHAR(256), phone_number VARCHAR(256), 
+          phone_number_verified BOOLEAN, address_id VARCHAR(256), 
+          updated_time VARCHAR(256), birthdate VARCHAR(256), 
+          src VARCHAR(4096));
+```
+
+#### Create view client_details
+This essential re-creates the default `client_details` consistent with 
+Mitreid's datamodel (so it's a valid `client_details` table. 
+```
+CREATE VIEW client_details AS SELECT * FROM public.dblink('obpapiserver', 'select id,
+description,
+''t'' reuse_refresh_tokens,
+''f'' dynamically_registered,
+''f'' allow_introspection,
+''600'' id_token_validity_seconds,
+NULL device_code_validity_seconds,
+key_c,
+secret,
+''3600'' access_token_validity_seconds,
+NULL refresh_token_validity_seconds,
+NULL application_type,
+name,
+''SECRET_BASIC'' token_endpoint_auth_method,
+NULL subject_type,
+NULL logo_uri,
+NULL policy_uri,
+NULL client_uri,
+NULL tos_uri,
+NULL jwks_uri,
+NULL jwks,
+NULL sector_identifier_uri,
+NULL request_object_signing_alg,
+NULL user_info_signed_response_alg,
+NULL user_info_encrypted_response_alg,
+NULL user_info_encrypted_response_enc,
+NULL id_token_signed_response_alg,
+NULL id_token_encrypted_response_alg,
+NULL id_token_encrypted_response_enc,
+NULL token_endpoint_auth_signing_alg,
+''60000'' default_max_age,
+''t'' require_auth_time,
+createdat,
+NULL initiate_login_uri,
+''t'' clear_access_tokens_on_refresh,
+NULL software_statement,
+NULL software_id,
+NULL software_version,
+NULL code_challenge_method from public.consumer') AS DATA (
+id INT,
+client_description VARCHAR(1024),
+reuse_refresh_tokens BOOLEAN,
+dynamically_registered BOOLEAN,
+allow_introspection BOOLEAN,
+id_token_validity_seconds BIGINT,
+device_code_validity_seconds BIGINT,
+client_id VARCHAR(256),
+client_secret VARCHAR(2048),
+access_token_validity_seconds BIGINT,
+refresh_token_validity_seconds BIGINT,
+application_type VARCHAR(256),
+client_name VARCHAR(256),
+token_endpoint_auth_method VARCHAR(256),
+subject_type VARCHAR(256),
+logo_uri VARCHAR(2048),
+policy_uri VARCHAR(2048),
+client_uri VARCHAR(2048),
+tos_uri VARCHAR(2048),
+jwks_uri VARCHAR(2048),
+jwks VARCHAR(8192),
+sector_identifier_uri VARCHAR(2048),
+request_object_signing_alg VARCHAR(256),
+user_info_signed_response_alg VARCHAR(256),
+user_info_encrypted_response_alg VARCHAR(256),
+user_info_encrypted_response_enc VARCHAR(256),
+id_token_signed_response_alg VARCHAR(256),
+id_token_encrypted_response_alg VARCHAR(256),
+id_token_encrypted_response_enc VARCHAR(256),
+token_endpoint_auth_signing_alg VARCHAR(256),
+default_max_age BIGINT,
+require_auth_time BOOLEAN,
+created_at TIMESTAMP,
+initiate_login_uri VARCHAR(2048),
+clear_access_tokens_on_refresh BOOLEAN,
+software_statement VARCHAR(4096),
+software_id VARCHAR(2048),
+software_version VARCHAR(2048),
+code_challenge_method VARCHAR(256));
+
+```
+
+### Prepare remaining Oauth spesific views:
+
+#### Drop existing tables
+```
+drop table client_contact;
+drop table client_grant_type;
+drop table client_scope;
+drop table client_response_type;
+drop table client_redirect_uri;
+```
+
+#### Create client_contact view:
+```
+CREATE VIEW client_contact AS 
+  SELECT * FROM public.dblink('obpapiserver', 
+    'select id, developeremail 
+    from public.consumer') 
+  AS DATA(owner_id INT, contact VARCHAR(256));
+```
+
+#### Create client_grant_type view:
+```
+CREATE VIEW client_grant_type AS 
+  SELECT * FROM public.dblink('obpapiserver', 
+    'select id, ''authorization_code'' grant_type 
+    from public.consumer') 
+  AS DATA (owner_id INT, grant_type VARCHAR(2000));
+```
+
+#### Create client_scope view:
+Creates default scope of openid
+```
+CREATE VIEW client_scope AS 
+    SELECT * FROM public.dblink('obpapiserver', 
+      'select id, ''openid'' scope 
+      from public.consumer') 
+    AS DATA (owner_id INT, scope VARCHAR(2048));
+```
+
+#### Create client_response_type view:
+```
+CREATE VIEW client_response_type AS 
+    SELECT * FROM public.dblink('obpapiserver', 
+      'select id, ''code'' response_type 
+      from public.consumer') 
+    AS DATA (owner_id INT, response_type VARCHAR(2048));
+```
+
+#### Create client_redirect_uri view:
+```
+CREATE VIEW client_redirect_uri AS 
+    SELECT * FROM public.dblink('obpapiserver', 
+      'select id, redirecturl 
+      from public.consumer') 
+    AS DATA (owner_id INT, redirect_uri VARCHAR(2048));
+```
 
 Teardown:
 ```
