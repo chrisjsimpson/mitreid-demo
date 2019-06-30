@@ -165,9 +165,112 @@ Now the database is seeded, remove or comment out `initialize-database` section:
 vi openid-connect-server-webapp/src/main/webapp/WEB-INF/data-context.xml
 ```
 
+# Configure link between Open Bank Project database & mitreid
+
+Now we want users registered via Open Bank Project, to also be users 
+registered in mitreid. We're **not** going to duplicate the data. 
+Instead, we're going to create a *link* between the two databases and
+expose this as a database *view* to Mitreid. Mitreid will think it's
+looking at it's default users table, but actually it's viewing 
+Open Bank Project's database. Obviously we need to fill in gaps, Mitreid
+provides much of the rest.
+
+- We want to authenticate against the user accounts in the OBP-API databse
 
 
+Get the IP address of your Open Bank Project postgress docker instance.
+(Sorry, you only need to do this because this demo uses docker, if you're not
+using docker for your postgres instances, obviously you don't need to do this):
 
+```
+# Save the output of 
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' obp
+```
+You'll need that IP when connecting from Mitreid's database to Open Bank 
+Project's database.
+
+Login to the mitreid postgres database:
+```
+docker exec -it mitreid bash
+psql -U oic # login to postgres as oic user
+# Create extension dblink
+CREATE EXTENSION dblink;
+```
+
+
+Quickly test connection:
+(Your IP address will be different, but the port the same) note that the port
+is 5432, this is because we're connecting directly to the container and not via 
+docker's port mappings.
+```
+SELECT dblink_connect('host=172.17.0.3:5432 user=obp password=password dbname=obp');
+```
+You should see:
+```
+ dblink_connect 
+----------------
+ OK
+(1 row)
+```
+
+Create db wrapper to able to create views later:
+(Note: your IP address will be different)
+This essentially creates a named connection to the remote server.
+```
+CREATE FOREIGN DATA WRAPPER dbobpapi VALIDATOR postgresql_fdw_validator;
+CREATE SERVER obpapiserver FOREIGN DATA WRAPPER dbobpapi OPTIONS (hostaddr '172.17.0.3', dbname 'obp');
+CREATE USER MAPPING FOR oic SERVER obpapiserver OPTIONS (user 'obp', password 'password');
+```
+
+Test that the wrapper was created correctly:
+```
+SELECT dblink_connect('obpapiserver');
+# Output:
+ dblink_connect 
+----------------
+ OK
+(1 row)
+```
+
+Grant usage privilege for user oic on the wrapper
+```
+GRANT USAGE ON FOREIGN SERVER obpapiserver TO oic;
+```
+
+## Create Database Views of the remote users 
+We will drop certain tables created by MITREId Connect during initialization 
+and create views insted.
+
+All these views take what data we can from Open Bank Project, and for 
+Oauth related objects, mitreid defaults are used (this is because *Mitreid still
+needs to see a table (view) which is consistent with its existing datamodel*).
+
+### Delete Mitreid generated tables
+(we will re-create them as views to Open Bank Project):
+```
+drop table authorities;
+drop table users;
+drop table user_info;
+drop table client_details;
+```
+
+#### Create the users view
+```
+CREATE VIEW users AS 
+  SELECT * FROM public.dblink ('obpapiserver', 
+    'select username, substring(concat(password_pw,password_slt), 3), 
+    validated from public.authuser') 
+  AS DATA(username VARCHAR, password VARCHAR, enabled VARCHAR);
+```
+
+### Create the authorities view
+```
+CREATE VIEW authorities AS 
+  SELECT * FROM dblink ('obpapiserver', 
+    'select username, 
+    ''ROLE_USER'' authority from authuser') 
+  AS DATA(username VARCHAR, authority VARCHAR);
+```
 
 
 Teardown:
