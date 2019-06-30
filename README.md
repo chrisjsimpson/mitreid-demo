@@ -200,6 +200,7 @@ Login to the mitreid postgres database:
 ```
 docker exec -it mitreid bash
 psql -U oic # login to postgres as oic user
+\c oic
 # Create extension dblink
 CREATE EXTENSION dblink;
 ```
