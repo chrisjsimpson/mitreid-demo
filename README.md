@@ -532,3 +532,8 @@ docker rm obp
 docker stop mitreid
 docker rm mitreid
 ```
+
+## Useful links
+
+- Oauth2 spec: https://tools.ietf.org/html/rfc6749
+- Oauth2 simplified https://aaronparecki.com/oauth-2-simplified/#authorization
