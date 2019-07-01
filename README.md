@@ -492,13 +492,22 @@ Where:
 
 - CLIENT_ID is generated upon registering a client (on Open Bank Project)
 - Response_type is authorization_code
+- REDIRECT_URI is the registerd clients redirect url 
+  - Meaning, when you create a consumer on Open Bank Project, it is the redirect
+    url set when registering an app.
 
 #### How do I know the client_id?
 ```
 select client_id from client_details;
 ```
 
-http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&client_id=zylmowrrystppebu3cwd4zfmhxcj1epkjrp0qqvn&redirect_uri=REDIRECT_URI&scope=photos&state=1234zyx
+#### How do I know my client_redirect_uri?
+```
+select * from client_redirect_uri;
+```
+
+
+http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&client_id=zylmowrrystppebu3cwd4zfmhxcj1epkjrp0qqvn&redirect_uri=http://127.0.0.1:5000&scope=photos&state=1234zyx
 
 
 
