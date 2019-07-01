@@ -40,6 +40,8 @@ For this will will use Open Bank Project as an example.
 Users may create accounts at the Open Bank Project application, and 
 oauth clients may be created via the Open Bank Project application.
 
+<a href="https://www.youtube.com/watch?v=tINgtBLwQak">Video advanced demo, local install</a>
+
 ## Quickly start two postgress instances
 
 - One for Open Bank Project
