@@ -444,6 +444,45 @@ CREATE VIEW client_redirect_uri AS
     AS DATA (owner_id INT, redirect_uri VARCHAR(2048));
 ```
 
+### Enable password encryption using bcrypt in Mitreid
+
+Edit the user-context to use bcrypt:
+`vi openid-connect-server-webapp/src/main/webapp/WEB-INF/user-context.xml`
+#Replace the `id="authenticationManager"` section with:
+```
+  <security:authentication-manager id="authenticationManager">
+    <security:authentication-provider>
+      <security:jdbc-user-service data-source-ref="dataSource"/>
+      <security:password-encoder ref="bcrypt" />
+    </security:authentication-provider>
+  </security:authentication-manager>
+
+  <bean id="bcrypt" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder">
+          <constructor-arg name="strength" value="10" />
+  </bean>
+```
+
+Now run Mitreid again, which will now:
+
+- Use the views we created
+- Allow you to login via Mitreid
+
+note, you *must* first go into `openid-connect-server-webapp` first:
+```
+cd openid-connect-server-webapp/
+mvn jetty:run-war
+```
+
+Visit: 
+http://localhost:8080/openid-connect-server-webapp
+.. and login as an Open Bank Project User
+
+- Users created on Open Bank Project will be able to login
+  to Mitreid
+
+Next steps: Configure an oauth client to login via Mitreid (identify)
+
+
 Teardown:
 ```
 docker stop obp
