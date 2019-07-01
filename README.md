@@ -201,7 +201,7 @@ Login to the mitreid postgres database:
 docker exec -it mitreid bash
 psql -U oic # login to postgres as oic user
 \c oic
-# Create extension dblink
+--  Create extension dblink
 CREATE EXTENSION dblink;
 ```
 
@@ -482,6 +482,39 @@ http://localhost:8080/openid-connect-server-webapp
 
 Next steps: Configure an oauth client to login via Mitreid (identify)
 
+## Login using oauth2 flow
+
+The Mitreid authorization url is:
+
+http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&scope=photos&state=1234zyx
+
+Where:
+
+- CLIENT_ID is generated upon registering a client (on Open Bank Project)
+- Response_type is authorization_code
+
+#### How do I know the client_id?
+```
+select client_id from client_details;
+```
+
+http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&client_id=zylmowrrystppebu3cwd4zfmhxcj1epkjrp0qqvn&redirect_uri=REDIRECT_URI&scope=photos&state=1234zyx
+
+
+
+### Debug
+
+#### Help I need to change the IP address of the dblink_connect server wrapper
+See https://www.postgresql.org/docs/8.4/sql-alterserver.html
+Example:
+```
+docker exec -it mitreid bash
+psql -U oic
+-- Alter:
+ALTER SERVER obpapiserver OPTIONS (SET hostaddr '172.17.0.2'); # change ip
+-- Verify:
+SELECT dblink_connect('obpapiserver');
+```
 
 Teardown:
 ```
