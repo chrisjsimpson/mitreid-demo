@@ -486,7 +486,7 @@ Next steps: Configure an oauth client to login via Mitreid (identify)
 
 The Mitreid authorization url is:
 
-http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&scope=photos&state=1234zyx
+http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&scope=openid&state=1234zyx
 
 Where:
 
@@ -507,7 +507,7 @@ select * from client_redirect_uri;
 ```
 
 
-http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&client_id=zylmowrrystppebu3cwd4zfmhxcj1epkjrp0qqvn&redirect_uri=http://127.0.0.1:5000&scope=photos&state=1234zyx
+http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&client_id=zylmowrrystppebu3cwd4zfmhxcj1epkjrp0qqvn&redirect_uri=http://127.0.0.1:5000&scope=openid&state=1234zyx
 
 
 
