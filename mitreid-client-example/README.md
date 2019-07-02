@@ -1,6 +1,9 @@
 # Demo oauth2 client 
 
 ### What does this do?
+
+Read `client/__init__.py` to see what's happening (it's only 20 lines long)
+
 1. Connects to mitreid ( `Authorization endpoint: /authorize`)
 2. Requests access token ( `Token endpoint: /token`) 
   - https://tools.ietf.org/html/rfc6749#section-4.1.3
