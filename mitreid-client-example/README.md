@@ -25,12 +25,13 @@ If you don't know these, follow: https://github.com/chrisjsimpson/mitreid-demo y
 
 # Setup 
 
-Edit `client/__init__.py` with your client id and client secret (TODO make this config).
-
-Then:
 ```
 git clone git@github.com:chrisjsimpson/mitreid-demo.git
 cd mitreid-demo/mitreid-client-example
+```
+Edit `client/__init__.py` with your client id and client secret (TODO make this config).
+Then:
+```
 virtualenv -p python3 venv
 . venv/bin/activate
 pip install -r requirements.txt
