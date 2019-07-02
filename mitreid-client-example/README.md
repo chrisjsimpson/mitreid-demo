@@ -48,4 +48,4 @@ http://localhost:8080/openid-connect-server-webapp/authorize?response_type=code&
 
 Then you will see the auth token (if successful)
 
-view `__init__.py` to see what's happening (it's only 20 lines long)
+view `client/__init__.py` to see what's happening (it's only 20 lines long)
