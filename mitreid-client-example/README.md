@@ -8,6 +8,8 @@
 
 That's it.
 
+[Video demo](https://www.youtube.com/watch?v=Vn80iB9LFUw&feature=youtu.be)
+
 ## Assumptions:
 
 - You have Mitreid running on: http://localhost:8080/openid-connect-server-webapp
@@ -19,10 +21,11 @@ You need to know your:
 - Client id
 - Client secret
 - Client redirect url
+If you don't know these, follow: https://github.com/chrisjsimpson/mitreid-demo you basically need to create an app, and upon registering your app gets given a client id and client secret. You choose the redirect url back to your own app (this repo serves as an example client app).
 
 # Setup 
 
-Edit __init__.py with your client id and client secret (TODO make this config).
+Edit `client/__init__.py` with your client id and client secret (TODO make this config).
 
 Then:
 ```
